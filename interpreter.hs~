@@ -1,0 +1,16 @@
+module interpreter where
+
+import qualified DataTypes.hs as DT
+
+interpDT :: DT.Expr -> DT.Value
+interpDT e = case e of
+{- DT.IntE i -> DT.Value (L3.IntE i)
+ DT.PlusE e1 e2 -> 
+ DT.TimesE e1 e2 -> 
+ DT.BoolE e -> 
+ DT.OrE e1 e2 ->
+ DT.IfE e1 e2 e3 -> 
+ DT.AndE e1 e2 -> 
+ DT.NegE Expr
+ DT.LetE s e1 e2 ->
+ DT.PairE (e1,e2) -> 
