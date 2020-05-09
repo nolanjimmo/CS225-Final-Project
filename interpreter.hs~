@@ -1,53 +1,58 @@
-module interpreter where
+module Interpreter where
 
-import qualified DataTypes.hs as DT
+import qualified DataTypes as DT
 
-interpDT :: DT.Expr -> DT.Value
-interpDT e = case e of
-{- DT.IntE i -> DT.IntV (DT.IntE i)
+import Data.Map (Map)
+import qualified Data.Map as Map
+
+interpDT :: DT.Expr -> DT.Env -> Maybe(DT.Value, DT.Env)
+interpDT e env = case e of
+ DT.IntE i -> Just(DT.IntV i, env)
  DT.PlusE e1 e2 -> case (e1, e2) of
-    (DT.IntE i1, DT.IntE i2) -> DT.IntV ( i1 + i2)
+    (DT.IntE i1, DT.IntE i2) -> Just(DT.IntV ( i1 + i2), env)
  DT.TimesE e1 e2 -> case (e1, e2) of
-    (DT.IntV(DT.IntE i1), DT.IntV (DT.IntE i2)) -> DT.IntV (i1 * i2)
- DT.BoolE e -> DT.BoolV b
- DT.OrE e1 e2 -> case (interpDT e1) of
-    (DT.BoolV( DT.BoolE( true))) -> DT.BoolV true
-    _ -> case (interpDT e2) of
-       (DT.BoolV( DT.BoolE( true))) -> DT.BoolV true
-       _ -> DT.BoolV false
- DT.IfE e1 e2 e3 -> case (interpDT e1) of
-    (DT.BoolV true) -> interpDT e2
-    _ -> interpDT e3
- DT.NegE e -> case (interpDT e) of
-    (DT.IntV i) -> (-i)
-    (DT.BoolV b) -> (!b)
- DT.LetE s e1 e2 -> 
- DT.PairE (e1,e2) -> DT.PairV ((fst e1), (snd e2))
- DT.fst e -> interpDT e
- DT.snd e -> interpDT e
- DT.right e -> case interpDT e of
-    e1 -> DT.rightV e1
- DT.left e -> interpDT e
-    e1 -> DT.rightV e1
- -} 
+    (DT.IntE i1, DT.IntE i2) -> Just(DT.IntV (i1 * i2), env)
+ DT.BoolE b -> Just(DT.BoolV b, env)
+ DT.OrE e1 e2 -> case (interpDT e1 env) of
+    Just(DT.BoolV(true), env) -> Just(DT.BoolV true, env)
+    _ -> case (interpDT e2 env) of
+       Just(DT.BoolV(true), env) -> Just(DT.BoolV True, env)
+       _ -> Just(DT.BoolV False, env)
+ DT.IfE e1 e2 e3 -> case (interpDT e1 env) of
+    Just(DT.BoolV true, env) -> interpDT e2 env
+    _ -> interpDT e3 env
+ DT.NegE e -> case (interpDT e env) of
+    Just(DT.IntV i, env) -> Just(DT.IntV (-i), env)
+    Just(DT.BoolV b, env) -> if b == True
+                             then Just(DT.BoolV False, env)
+                             else Just(DT.BoolV True, env)
+    _ -> Nothing
+ DT.LetE x e1 e2 -> case interpDT e1 env of
+    Just(v, env) -> interpDT e2 (Map.insert x v env)
+ DT.VarE x -> case Map.lookup x env of
+    Just v -> Just(v, env)
+ DT.PairE (e1,e2) -> case ((interpDT e1 env), (interpDT e2 env)) of
+    ((Just(v1, env1)),(Just(v2, env2))) -> Just(DT.PairV(v1, v2), env)
+ DT.Fst e -> interpDT e env
+ DT.Snd e -> interpDT e env
+ DT.CaseE e x1 e1 x2 e2 -> case interpDT e env of
+    Just(DT.LeftV v, env1) -> interpDT e1 (Map.insert x1 v env)
+    Just(DT.RightV v, env1) -> interpDT e2 (Map.insert x2 v env)
+ DT.Right e -> case interpDT e env of
+    Just(v, env1) -> Just(DT.RightV v, env)
+ DT.Left e -> case interpDT e env of
+    Just(v, env1) -> Just(DT.LeftV v, env)
 
-{- A few sample programs
- 
-("interpDT"
-, interpDt
-,[(1+1, 2)
-, (2*2, 4)
-, (true, true)
-, (true or fase, true)
-, (false or false, false)
-, (true and false, false)
-, (false and false, true)
-, (if true then 2 else false, true)
-, (!false, true)
-, (let x = 3 in x+x, 6)
-, ((2,3) + (4,5), (6,8)
-, ((2,3) * (4,5), (8,15)
-, ((true, false) and (false, true), (false, false)
-, ((true, false) and (true, false), (true, true)
- ]
-)
+
+
+testThisInterpreter :: Test
+testThisInterpreter = TestDir
+  ("Testing"
+  , "interpDT"
+  , interpDT
+  , "testsFP"
+  )
+
+main :: IO ()
+main = runTests
+  [testThisInterpreter] 

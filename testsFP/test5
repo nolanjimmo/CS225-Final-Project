@@ -1,0 +1,8 @@
+TEST
+
+let bu1 = right false in
+let b1 = case bu1 {left x => x + 5} {right x => 5 + x} in
+b1
+
+EXPECTED
+Nothing

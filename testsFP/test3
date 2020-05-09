@@ -1,0 +1,11 @@
+TEST
+
+let tu1 = right 5 in
+let tu2 = right 2 in
+let k1 = case tu1 {left x => x} {right x => x - 4} in
+let k2 = case tu2 (left y => y + 8} {right x => x * 2} in
+k1 - k2 
+
+EXPECTED
+
+-3

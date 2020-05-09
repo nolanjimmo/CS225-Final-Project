@@ -1,0 +1,8 @@
+TEST
+
+let p = (1+1, 2+2) in 
+fst p * fst p + snd p
+
+EXPECTED
+
+8

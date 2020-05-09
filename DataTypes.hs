@@ -1,5 +1,7 @@
 module DataTypes where
 
+import Data.Map (Map)
+
 data Expr =
     IntE Integer
   | PlusE Expr Expr
@@ -9,17 +11,22 @@ data Expr =
   | IfE Expr Expr Expr
   | NegE Expr
   | LetE String Expr Expr
+  | VarE String
   | PairE (Expr, Expr)
-  | fst Expr
-  | snd Expr
-  | left Expr
-  | right Expr
+  | Fst Expr
+  | Snd Expr
+  | CaseE Expr String Expr String Expr
+  | Left Expr
+  | Right Expr
   deriving (Eq,Ord,Show)
 
 data Value =
     IntV Integer
   | BoolV Bool
   | PairV (Value, Value)
-  | leftV Value
-  | rightV Value
+  | LeftV Value
+  | RightV Value
   deriving(Eq,Ord,Show)
+
+
+type Env = Map String Value
